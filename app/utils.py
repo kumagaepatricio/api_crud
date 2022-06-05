@@ -28,17 +28,31 @@ class Utils:
 
     @staticmethod
     def can_update(logged_user, update_user):
-        if not logged_user.is_staff:
+        if not logged_user.is_staff and not logged_user.username == update_user.username:
             raise ActionForbiddenException('Can not perform this action')
 
 
     @staticmethod
     def can_update_password(request, user):
+        can_update = True
         if not user.is_staff:
-            if not check_password(request.data.get('password'), user.password):
-                raise ActionForbiddenException('Can not change user password')
+            if not check_password(request.data.get('old_password'), user.password):
+                can_update = False
+        return can_update
+
+    @staticmethod
+    def can_update_email(email):
+        from .models import CustomUser
+        can_update = True
+        email = CustomUser.objects.filter(email=email)
+        if email:
+            can_update = False
+        return can_update
 
     @staticmethod
     def can_update_groups(logged_user):
+        can_update = True
         if not logged_user.is_staff:
-            raise ActionForbiddenException('Can not update groups')
+            can_update = False
+
+        return can_update

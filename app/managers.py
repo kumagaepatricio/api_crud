@@ -42,13 +42,19 @@ class UserManager(models.Manager):
 
         custom_user = CustomUser.objects.get(uuid=uuid)
 
-        Utils.can_update_password(request, custom_user)
+        Utils.can_update(request.user, custom_user)
 
         custom_user.first_name = request.data.get('first_name')
+        custom_user.last_name = request.data.get('last_name')
+        if Utils.can_update_email(request.data.get('email')):
+            custom_user.email = request.data.get('email')
+        if Utils.can_update_password(request, custom_user):
+            custom_user.set_password(request.data.get('password'))
 
-
-
+        custom_user.date_updated = datetime.datetime.now()
         custom_user.save()
+
+        return custom_user
 
 
     @staticmethod

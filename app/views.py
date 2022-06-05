@@ -46,6 +46,7 @@ class UserView(APIView):
         try:
             custom_user = CustomUser.objects.update_user(request, uuid)
             serializer = CustomUserFullSerializer(custom_user)
+
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except ActionForbiddenException as message:
             return Response(data={'message': str(message)}, status=status.HTTP_400_BAD_REQUEST)
