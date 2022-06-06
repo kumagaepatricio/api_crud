@@ -10,10 +10,16 @@ Clone the project
 git clone https://github.com/kumagaepatricio/ine_test.git
 ```
 
-## Default user
+Run
+```bash
+docker-compose up --build
+```
 
-There is already a superuser "ine_admin" with password "ineadminpass" who can obtain a jwt token to create other users
 
+## Notes
+
+- There is already a superuser "ine_admin" with password "ineadminpass" who can obtain a JWT token to create other users
+- For this project I'm  using a Sqlite3 database, but in production projects I would use another database like Postgresql
 ## Usage
 To obtain a JWT access token make a POST request to /api/auth/token/ with "ine_admin" credentials (in this case I am running the app on http://127.0.0.1:8000)
 
