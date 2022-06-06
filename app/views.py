@@ -10,6 +10,14 @@ from .serializers import CustomUserBaseSerializer, CustomUserFullSerializer
 from .managers import UserManager
 from .exceptions import PasswordException, ActionForbiddenException
 
+class TestView(APIView):
+
+    def get(self, req):
+        from django.contrib.auth.models import User
+
+        user = User.objects.all().first()
+
+        return Response(data={'a', user})
 
 class UserView(APIView):
     """Need to be logged in to perform any HTTP request"""
@@ -36,8 +44,8 @@ class UserView(APIView):
 
         except (PasswordException, ActionForbiddenException) as message:
             return Response(data={'message': str(message)}, status=status.HTTP_400_BAD_REQUEST)
-        except IntegrityError:
-            return Response(data={'message': 'Already existing username'}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError as e:
+            return Response(data={'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
