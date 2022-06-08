@@ -1,16 +1,22 @@
-import bcrypt, uuid, datetime, responses, requests
+"""Managers file with DB interaction methods"""
+import uuid
+import datetime
+import responses
+import requests
 
-from django.db import models
+from django.db   import models
 from django.contrib.auth.models import Group
-
 
 from .utils import Utils
 
 
 class UserManager(models.Manager):
+    """This class includes all User related methods"""
 
     @staticmethod
     def create_user(request):
+        """Method called from view to create a user.
+        Includes user creation and validations"""
         from .models import CustomUser
 
         Utils.can_create(request.user)
@@ -37,10 +43,11 @@ class UserManager(models.Manager):
         return user
 
     @staticmethod
-    def update_user(request, uuid):
+    def update_user(request, user_uuid):
+        """Method that updates a user"""
         from .models import CustomUser
 
-        custom_user = CustomUser.objects.get(uuid=uuid)
+        custom_user = CustomUser.objects.get(uuid=user_uuid)
 
         Utils.can_update(request.user, custom_user)
 
@@ -58,20 +65,21 @@ class UserManager(models.Manager):
 
 
     @staticmethod
-    def delete_user(request, uuid):
+    def delete_user(request, user_uuid):
+        """Method that deletes a user"""
         from .models import CustomUser
-        delete_user = CustomUser.objects.get(uuid=uuid)
+        delete_user = CustomUser.objects.get(uuid=user_uuid)
         Utils.can_delete(request.user, delete_user)
         CustomUser.objects.get(uuid=uuid).delete()
 
     @staticmethod
     def set_user_groups(user, groups):
-
+        """Method user to set groups to users on creation"""
         for group in groups:
 
             try:
                 user.groups.add(Group.objects.get(name=group))
-            except Exception as e:
+            except Group.DoesNotExist:
                 """Non existing group created on demand"""
                 user.groups.add(GroupManager.create_group(group))
 
@@ -90,13 +98,16 @@ class UserManager(models.Manager):
 
         responses.add(subscription_response)
 
-        req = requests.get(f"https://subscriptions.fake.service.test/api/v1/users/:uuid", data={'uuid': new_uuid})
+        req = requests.get('https://subscriptions.fake.service.test/api/v1/users/:uuid',
+                           data={'uuid': new_uuid})
 
         return req.json()['subscription']
 
 
 class GroupManager(models.Manager):
+    """Manager with Group related methods"""
 
     @staticmethod
     def create_group(name):
+        """Method that creates a Group"""
         return Group.objects.create(name=name)

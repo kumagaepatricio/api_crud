@@ -1,3 +1,4 @@
+"""Views from the main app"""
 from django.db import IntegrityError
 
 from rest_framework.views import APIView
@@ -10,20 +11,15 @@ from .serializers import CustomUserBaseSerializer, CustomUserFullSerializer
 from .managers import UserManager
 from .exceptions import PasswordException, ActionForbiddenException
 
-class TestView(APIView):
-
-    def get(self, req):
-        from django.contrib.auth.models import User
-
-        user = User.objects.all().first()
-
-        return Response(data={'a', user})
-
 class UserView(APIView):
     """Need to be logged in to perform any HTTP request"""
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, uuid):
+    @staticmethod
+    def get(request, uuid):
+        """GET method that obtains a user from the DB.
+        If user is admin or getting self info gets full data,
+        otherwise will get basic data"""
         user = CustomUser.objects.get(uuid=uuid)
 
         if request.user.is_staff or user.username == request.user.username:
@@ -33,8 +29,9 @@ class UserView(APIView):
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-
+    @staticmethod
+    def post(request):
+        """POST method to create a new user"""
         try:
 
             user = UserManager.create_user(request)
@@ -44,13 +41,14 @@ class UserView(APIView):
 
         except (PasswordException, ActionForbiddenException) as message:
             return Response(data={'message': str(message)}, status=status.HTTP_400_BAD_REQUEST)
-        except IntegrityError as e:
-            return Response(data={'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
+        except IntegrityError as integrity_error:
+            return Response(data={'message': str(integrity_error)},
+                            status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def put(self, request, uuid):
-
+    @staticmethod
+    def put(request, uuid):
+        """PUT method to update an existing user"""
         try:
             custom_user = CustomUser.objects.update_user(request, uuid)
             serializer = CustomUserFullSerializer(custom_user)
@@ -59,14 +57,12 @@ class UserView(APIView):
         except ActionForbiddenException as message:
             return Response(data={'message': str(message)}, status=status.HTTP_400_BAD_REQUEST)
 
-
-    def delete(self, request, uuid):
-
+    @staticmethod
+    def delete(request, uuid):
+        """DELETE method to delete a user"""
         try:
             UserManager.delete_user(request, uuid)
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ActionForbiddenException as message:
             return Response(data={'message': str(message)}, status=status.HTTP_400_BAD_REQUEST)
-
-
