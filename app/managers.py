@@ -70,7 +70,7 @@ class UserManager(models.Manager):
         from .models import CustomUser
         delete_user = CustomUser.objects.get(uuid=user_uuid)
         Utils.can_delete(request.user, delete_user)
-        CustomUser.objects.get(uuid=uuid).delete()
+        CustomUser.objects.get(uuid=user_uuid).delete()
 
     @staticmethod
     def set_user_groups(user, groups):
