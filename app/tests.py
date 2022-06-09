@@ -1,24 +1,23 @@
-from django.test import TestCase
+"""Test classes"""
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from django.contrib.auth.models import User
 
-from app.models import CustomUser
-from app.serializers import CustomUserFullSerializer
-
-
 
 class UsersTestCase(APITestCase):
-
+    """Users test class with user creation for an
+    authenticated and not authenticated user, and
+    validations"""
 
     def authenticate(self):
-
+        """Method to create and authenticate user, used by
+        other methods"""
         data = {"username":"ine_admin", "password":"ineadminpass"}
 
-        u = User.objects.create_superuser('ine_admin', 'admin@ine.com', 'ineadminpass')
-        u.save()
+        user = User.objects.create_superuser('ine_admin', 'admin@ine.com', 'ineadminpass')
+        user.save()
 
         response = self.client.post(reverse('token_obtain_pair'), data, format='json')
 
@@ -66,8 +65,6 @@ class UsersTestCase(APITestCase):
 
         response = self.client.post('/api/v1/users/', data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-
 
 
     def test_create_user_authenticated_201(self):
