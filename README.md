@@ -1,3 +1,3 @@
 # API CRUD
 
-Django/DRF API CURD
+Django/DRF API CRUD
