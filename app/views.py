@@ -1,4 +1,6 @@
 """Views from the main app"""
+import logging
+
 from django.db import IntegrityError
 
 from rest_framework.views import APIView
@@ -10,6 +12,8 @@ from .models import CustomUser
 from .serializers import CustomUserBaseSerializer, CustomUserFullSerializer
 from .managers import UserManager
 from .exceptions import PasswordException, ActionForbiddenException
+
+logger = logging.getLogger('api_crud')
 
 class UserView(APIView):
     """Need to be logged in to perform any HTTP request"""
@@ -44,7 +48,8 @@ class UserView(APIView):
         except IntegrityError as integrity_error:
             return Response(data={'message': str(integrity_error)},
                             status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
+        except Exception as exc:
+            logger.error(str(exc))
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     @staticmethod
     def put(request, uuid):
